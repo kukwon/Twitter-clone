@@ -90,6 +90,8 @@ export default function PostTweetForm() {
         userId: user.uid,
         fileData: file,
       });
+      setTweet("");
+      setFile(null);
     } catch (error) {
       console.log(error);
     } finally {
@@ -99,6 +101,7 @@ export default function PostTweetForm() {
   return (
     <Form onSubmit={onSubmit}>
       <TextArea
+        required
         rows={5}
         maxLength={180}
         onChange={onChange}
