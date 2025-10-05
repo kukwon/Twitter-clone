@@ -2,6 +2,8 @@ import styled from "styled-components";
 import type { ITweet } from "./timeline";
 import { auth, db } from "../firebase";
 import { deleteDoc, doc } from "firebase/firestore";
+import { useState } from "react";
+import UpdateTweetForm from "./edit-tweet-form";
 
 const Wrapper = styled.div`
   display: grid;
@@ -42,6 +44,18 @@ const DeleteButton = styled.button`
   cursor: pointer;
 `;
 
+const EditButton = styled.button`
+  background-color: #1d9bf0;
+  color: white;
+  font-weight: 600;
+  border: 0;
+  font-size: 12px;
+  padding: 5px 10px;
+  text-transform: uppercase;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
 export default function Tweet({
   username,
   tweet,
@@ -50,6 +64,7 @@ export default function Tweet({
   id,
 }: ITweet) {
   const user = auth.currentUser;
+  const [update, setUpdate] = useState(false);
   const onDelete = async () => {
     const ok = confirm("Are you sure you want to delete this tweet?");
 
@@ -62,13 +77,34 @@ export default function Tweet({
       //
     }
   };
+
+  const onUpdate = async () => {
+    if (!update) {
+      setUpdate(true);
+      return;
+    }
+  };
+
   return (
     <Wrapper>
       <Column>
         <Username>{username}</Username>
-        <Payload>{tweet}</Payload>
+        {!update ? (
+          <Payload>{tweet}</Payload>
+        ) : (
+          <UpdateTweetForm
+            id={id}
+            setUpdate={setUpdate}
+            afterFile={fileData}
+            afterTweet={tweet}
+          />
+        )}
         {user?.uid === userId ? (
-          <DeleteButton onClick={onDelete}>Delete</DeleteButton>
+          <>
+            <EditButton onClick={onUpdate}>Edit</EditButton>
+            &nbsp;
+            <DeleteButton onClick={onDelete}>Delete</DeleteButton>
+          </>
         ) : null}
       </Column>
       <Column>{fileData ? <Photo src={fileData} /> : null}</Column>
