@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { auth, db } from "../firebase";
+import { updateProfile } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 import {
   addDoc,
@@ -174,6 +175,29 @@ export default function Profile() {
       alert("닉네임 2글자 이상");
       nameInputRef.current?.focus();
       return;
+    }
+    if (!user) return;
+
+    try {
+      // 1️⃣ Firebase Auth 사용자 정보 업데이트
+      await updateProfile(user, { displayName: name });
+
+      // 2️⃣ Firestore users 컬렉션에도 닉네임 업데이트
+      const usersCollectionRef = collection(db, "users");
+      const q = query(usersCollectionRef, where("userId", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const userDocRef = querySnapshot.docs[0].ref;
+        await updateDoc(userDocRef, { displayName: name });
+      }
+
+      // 상태 업데이트 및 편집 종료
+      setEditing(false);
+      alert("닉네임이 변경되었습니다!");
+    } catch (error) {
+      console.error("닉네임 변경 실패:", error);
+      alert("닉네임 변경 중 오류가 발생했습니다.");
     }
   };
 
