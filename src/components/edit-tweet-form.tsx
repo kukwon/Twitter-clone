@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../firebase.ts";
+import { handleFileChange } from "../util/util.ts";
 
 interface UpdateTweetFormProps {
   id: string;
@@ -94,19 +95,24 @@ export default function UpdateTweetForm({
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTweet(e.target.value);
   };
+
   // base64 인코딩
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { files } = e.target;
-    if (files && files.length === 1) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        console.log("File data encoded:", result); // 확인 로그 추가
-        setFile(result); // 상태 업데이트
-        setChangeFile(true);
-      };
-      reader.readAsDataURL(files[0]);
-    }
+    handleFileChange(e, (fileData) => {
+      setFile(fileData); //상태 업데이트
+      setChangeFile(true);
+    });
+    // const { files } = e.target;
+    // if (files && files.length === 1) {
+    //   const reader = new FileReader();
+    //   reader.onloadend = () => {
+    //     const result = reader.result as string;
+    //     console.log("File data encoded:", result); // 확인 로그 추가
+    //     setFile(result); // 상태 업데이트
+    //     setChangeFile(true);
+    //   };
+    //   reader.readAsDataURL(files[0]);
+    // }
   };
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
